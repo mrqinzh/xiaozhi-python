@@ -15,10 +15,30 @@ https://ccnphfhqs21z.feishu.cn/wiki/M0XiwldO9iJwHikpXD5cEx71nKh
 
 https://github.com/78/xiaozhi-esp32/blob/main/docs/websocket.md
 
-# 关于该python脚本
+# 部署脚本
 python版本为3.7，以上版本应该也可以
 
 需要安装的依赖参考requirements.txt文件
+
+# 配置及使用
+
+一、设置对话模式，自动模式为自动识别语音，手动模式为长按空格键识别语音
+
+is_manualmode = False  #True 手动模式，False自动模式
+
+1、自动模式下，如果连接已经建立，空格键按下为打断当前对话，如果连接已经失效，则重建连接
+
+2、手动模式下，如果连接已经建立，长按空格键进行对话，如果连接已经失效，则重建连接
+
+二、设置设备的MAC地址，确保唯一性
+
+device_mac = "12:22:33:34:66:89"
+
+三、访问虾哥控制台，进行硬件绑定及设置
+
+1、控制台地址：https://xiaozhi.me/
+
+2、具体操作参见虾哥的手册：https://ccnphfhqs21z.feishu.cn/wiki/F5krwD16viZoF0kKkvDcrZNYnhb
 
 
 
