@@ -1,7 +1,9 @@
 # xiaozhi-python
 虾哥的小智 AI 聊天机器人（XiaoZhi AI Chatbot）- python客户端
 
-# 首先感谢虾哥提供的服务端
+# 鸣谢
+首先感谢虾哥提供的服务端
+
 https://github.com/78/xiaozhi-esp32
 
 以上是虾哥的github地址，大家可以去学习，动手能力强的可以制作esp32硬件版本的机器人
@@ -39,6 +41,14 @@ device_mac = "12:22:33:34:66:89"
 1、控制台地址：https://xiaozhi.me/
 
 2、具体操作参见虾哥的手册：https://ccnphfhqs21z.feishu.cn/wiki/F5krwD16viZoF0kKkvDcrZNYnhb
+
+# python客户端-udp协议版本
+
+参考zhh827网友的代码
+
+https://github.com/zhh827/py-xiaozhi
+
+玩的开心！！！
 
 
 
