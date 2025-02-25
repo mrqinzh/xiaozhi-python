@@ -18,7 +18,7 @@ https://ccnphfhqs21z.feishu.cn/wiki/M0XiwldO9iJwHikpXD5cEx71nKh
 https://github.com/78/xiaozhi-esp32/blob/main/docs/websocket.md
 
 # 部署脚本
-python版本为3.7，以上版本应该也可以
+python版本为3.8，以上版本应该也可以
 
 需要安装的依赖参考requirements.txt文件
 
@@ -32,7 +32,13 @@ is_manualmode = False  #True 手动模式，False自动模式
 
 2、手动模式下，如果连接已经建立，长按空格键进行对话，如果连接已经失效，则重建连接
 
-二、设置设备的MAC地址，确保唯一性
+二、设置设备的MAC地址，确保唯一性,令牌、UUID随意
+
+#访问令牌、设备 MAC 地址和设备 UUID
+
+access_token = "test-token"
+
+device_uuid = "test-uuid"
 
 device_mac = "12:22:33:34:66:89"
 
