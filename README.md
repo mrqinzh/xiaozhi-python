@@ -34,8 +34,6 @@ is_manualmode = False  #True 手动模式，False自动模式
 
 二、设置设备的MAC地址，确保唯一性,令牌、UUID随意
 
-#访问令牌、设备 MAC 地址和设备 UUID
-
 access_token = "test-token"
 
 device_uuid = "test-uuid"
