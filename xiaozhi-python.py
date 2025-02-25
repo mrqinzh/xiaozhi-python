@@ -28,7 +28,7 @@ msg_info = {"type": "hello", "session_id": "3a66666c"}
 
 # 访问令牌、设备 MAC 地址和设备 UUID
 access_token = "test-token"
-device_mac = "9c:29:76:21:c8:d9"
+device_mac = "12:23:33:21:c8:33"
 device_uuid = "test-uuid"
 
 # 音频参数
