@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 import json
+import requests
 import threading
 import pyaudio
 import opuslib
@@ -23,12 +24,17 @@ ws = None
 is_connected = False  # 标志位，用于判断 WebSocket 连接是否建立
 send_audio_thread = None
 
+# websocket 服务地址
+ws_url = "wss://api.tenclass.net/xiaozhi/v1/"
+# ota 服务地址
+ota_url = "https://api.tenclass.net/xiaozhi/ota/"
+
 # 记录会话 type state session_id等
 msg_info = {"type": "hello", "session_id": "3a66666c"}
 
 # 访问令牌、设备 MAC 地址和设备 UUID
 access_token = "test-token"
-device_mac = "12:23:33:21:c8:33"
+device_mac = "11:22:33:44:55:66"
 device_uuid = "test-uuid"
 
 # 音频参数
@@ -37,16 +43,33 @@ CHANNELS = 1
 CHUNK = 960  # 60ms 的音频数据量（16000 * 0.06）
 
 # 构建请求头
-headers = {
+websocket_headers = {
     "Authorization": f"Bearer {access_token}",
     "Protocol-Version": "1",
     "Device-Id": device_mac,
     "Client-Id": device_uuid
 }
-ws_url = "wss://api.tenclass.net/xiaozhi/v1/"
+ota_headers = {
+    'Device-Id': device_mac,
+    'Content-Type': 'application/json'
+}
+
+# 构建post内容
+ota_post_data = {"flash_size": 16777216, "minimum_free_heap_size": 8318916, "mac_address": f"{device_mac}",
+             "chip_model_name": "esp32s3", "chip_info": {"model": 9, "cores": 2, "revision": 2, "features": 18},
+             "application": {"name": "xiaozhi", "version": "0.9.9"},
+             "partition_table": [],
+             "ota": {"label": "factory"},
+             "board": {"type": "bread-compact-wifi", "ip": "192.168.124.38", "mac": f"{device_mac}"}}
 
 # 配置日志记录
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# 发送硬件信息，获取固件版本及下载地址
+def get_ota_version():
+    response = requests.post(ota_url, headers=ota_headers, data=json.dumps(ota_post_data))
+    logging.info(f"Get firmware version: {json.loads(response.text)['firmware']['version']}")
+    logging.info(f"firmware download url: {json.loads(response.text)['firmware']['url']}")
 
 # 发送文本消息（json)
 def send_json_message(message):
@@ -89,7 +112,7 @@ def on_space_key_press(event):
                                     on_message=on_message,
                                     on_error=on_error,
                                     on_close=on_close,
-                                    header=headers)
+                                    header=websocket_headers)
         # 启动 WebSocket 线程
         threading.Thread(target=ws.run_forever).start()
     else:
@@ -174,7 +197,6 @@ def on_error(ws, error):
 
 def on_open(ws):
     global is_connected, msg_info, listen_state
-    logging.info("WebServer connected by WebSocket !")
     logging.info("==================================")
     # websocket连接成功后发送hello消息
     hello_msg = {"type": "hello", "version": 1, "transport": "websocket",
@@ -192,6 +214,9 @@ def on_close(ws, close_status_code, close_msg):
 
 if __name__ == "__main__":
     try:
+        # 推送硬件信息，获取固件版本
+        get_ota_version()
+
         # 监听键盘按键
         listener = pynput_keyboard.Listener(on_press=on_press, on_release=on_release)
         listener.start()
@@ -224,7 +249,7 @@ if __name__ == "__main__":
                                     on_message=on_message,
                                     on_error=on_error,
                                     on_close=on_close,
-                                    header=headers)
+                                    header=websocket_headers)
         # 启动 WebSocket 线程
         websocket_thread = threading.Thread(target=ws.run_forever)
         websocket_thread.start()
