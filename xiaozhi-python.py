@@ -10,10 +10,21 @@ import websocket
 from pynput import keyboard as pynput_keyboard
 import logging
 
+from config import CONFIG
+
 # 设置交流模式，自动模式自动识别语音，手动模式长按空格键问答
 # 自动模式下，如果连接已经建立，空格键按下为打断当前对话，如果连接已经失效，则重建连接
 # 手动模式下，如果连接已经建立，长按空格键进行对话，如果连接已经失效，则重建连接
-is_manualmode = True  #True 手动模式，False自动模式
+is_manual_mode = CONFIG.get("is_manual_mode")
+# websocket 服务地址
+ws_url = CONFIG.get("ws_url")
+# ota 服务地址
+ota_url = CONFIG.get("ota_url")
+# 访问令牌、设备 MAC 地址和设备 UUID
+access_token = "test-token"
+# mac地址
+device_mac = CONFIG.get("device_mac_addr")
+device_uuid = "test-uuid"
 
 # 初始化状态变量
 listen_state = "stop"
@@ -24,20 +35,8 @@ ws = None
 is_connected = False  # 标志位，用于判断 WebSocket 连接是否建立
 send_audio_thread = None
 
-# websocket 服务地址
-# ws_url = "wss://api.tenclass.net/xiaozhi/v1/"
-ws_url = "ws://192.168.5.163:8000"
-# ota 服务地址
-ota_url = "https://api.tenclass.net/xiaozhi/ota/"
-
 # 记录会话 type state session_id等
 msg_info = {"type": "hello", "session_id": "3a66666c"}
-
-# 访问令牌、设备 MAC 地址和设备 UUID
-access_token = "test-token"
-# device_mac = "32:23:42:24:52:25"
-device_mac = "6c:7e:67:ca:4e:2a" # my
-device_uuid = "test-uuid"
 
 # 音频参数
 SAMPLE_RATE = 16000
@@ -102,7 +101,7 @@ def send_audio():
 
 # 空格键按下事件处理
 def on_space_key_press(event):
-    global key_state, msg_info, listen_state, ws, is_connected, tts_state, is_manualmode
+    global key_state, msg_info, listen_state, ws, is_connected, tts_state, is_manual_mode
     if key_state == "press":
         return
     key_state = "press"
@@ -123,7 +122,7 @@ def on_space_key_press(event):
             # 在播放状态下发送abort消息
             send_json_message({"type": "abort"})
 
-        if is_manualmode:
+        if is_manual_mode:
             # 发送start listen消息
             msg = {"session_id": msg_info['session_id'], "type": "listen", "state": "start", "mode": "manual"}
             send_json_message(msg)
@@ -131,9 +130,9 @@ def on_space_key_press(event):
 
 # 空格键松开事件处理
 def on_space_key_release(event):
-    global msg_info, key_state, listen_state, ws, is_manualmode
+    global msg_info, key_state, listen_state, ws, is_manual_mode
     key_state = "release"
-    if is_manualmode:
+    if is_manual_mode:
         # 发送stop listen消息
         if is_connected:
             msg = {"session_id": msg_info['session_id'], "type": "listen", "state": "stop"}
@@ -152,7 +151,7 @@ def on_release(key):
 
 # 接收服务器消息处理
 def on_message(ws, received_message):
-    global msg_info, tts_state, send_audio_thread, listen_state, is_manualmode
+    global msg_info, tts_state, send_audio_thread, listen_state, is_manual_mode
     if isinstance(received_message, bytes):# 处置二进制音频流
         try:
             # 解码 OPUS 数据为 PCM 数据
@@ -182,7 +181,7 @@ def on_message(ws, received_message):
 
             # hello握手后或者前一次语音发送完成后启动自动监听
             if msg['type'] == 'stt' or msg['type'] == 'hello':
-                if not is_manualmode:
+                if not is_manual_mode:
                     # 启动自动识别消息
                     msg = {"session_id": msg_info['session_id'], "type": "listen", "state": "start", "mode": "auto"}
                     send_json_message(msg)
