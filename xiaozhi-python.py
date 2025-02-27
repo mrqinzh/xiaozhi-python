@@ -13,7 +13,7 @@ import logging
 # 设置交流模式，自动模式自动识别语音，手动模式长按空格键问答
 # 自动模式下，如果连接已经建立，空格键按下为打断当前对话，如果连接已经失效，则重建连接
 # 手动模式下，如果连接已经建立，长按空格键进行对话，如果连接已经失效，则重建连接
-is_manualmode = False  #True 手动模式，False自动模式
+is_manualmode = True  #True 手动模式，False自动模式
 
 # 初始化状态变量
 listen_state = "stop"
@@ -25,7 +25,8 @@ is_connected = False  # 标志位，用于判断 WebSocket 连接是否建立
 send_audio_thread = None
 
 # websocket 服务地址
-ws_url = "wss://api.tenclass.net/xiaozhi/v1/"
+# ws_url = "wss://api.tenclass.net/xiaozhi/v1/"
+ws_url = "ws://192.168.5.163:8000"
 # ota 服务地址
 ota_url = "https://api.tenclass.net/xiaozhi/ota/"
 
@@ -34,7 +35,8 @@ msg_info = {"type": "hello", "session_id": "3a66666c"}
 
 # 访问令牌、设备 MAC 地址和设备 UUID
 access_token = "test-token"
-device_mac = "32:23:42:24:52:25"
+# device_mac = "32:23:42:24:52:25"
+device_mac = "6c:7e:67:ca:4e:2a" # my
 device_uuid = "test-uuid"
 
 # 音频参数
@@ -88,14 +90,15 @@ def send_audio():
             continue
         try:
             # 读取音频数据
-            pcm_data = input_stream.read(CHUNK)
+            pcm_data = input_stream.read(CHUNK, exception_on_overflow=False)
             # 编码为 OPUS 数据
             opus_data = encoder.encode(pcm_data, CHUNK)
             # 发送 OPUS 数据
             if ws and is_connected:
                 ws.send(opus_data, opcode=websocket.ABNF.OPCODE_BINARY)
         except Exception as e:
-            logging.error(f"读取或发送音频数据时出错: {e}")
+            import traceback
+            logging.error(f"读取或发送音频数据时出错: {e}\n{traceback.format_exc()}")
 
 # 空格键按下事件处理
 def on_space_key_press(event):
@@ -169,6 +172,7 @@ def on_message(ws, received_message):
                 if send_audio_thread is None or not send_audio_thread.is_alive():
                     # 启动一个线程，用于发送音频数据
                     send_audio_thread = threading.Thread(target=send_audio)
+                    send_audio_thread.daemon = True
                     send_audio_thread.start()
                 else:
                     logging.info("send_audio_thread is alive")
@@ -263,16 +267,3 @@ if __name__ == "__main__":
         # 停止 WebSocket 线程
         if ws:
             ws.close()
-        if websocket_thread:
-            websocket_thread.join()
-        # 确保资源正确释放
-        if input_stream:
-            input_stream.stop_stream()
-            input_stream.close()
-        if output_stream:
-            output_stream.stop_stream()
-            output_stream.close()
-        if p:
-            p.terminate()
-        if listener:
-            listener.stop()
