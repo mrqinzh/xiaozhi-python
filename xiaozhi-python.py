@@ -176,8 +176,8 @@ def on_message(ws, received_message):
             if msg['type'] == 'tts':
                 tts_state = msg['state']
 
-            # hello握手后或者前一次语音发送完成后启动自动监听
-            if msg['type'] == 'stt' or msg['type'] == 'hello':
+            # hello握手后或者前一次回答完成后启动自动监听
+            if tts_state == 'stop' or msg['type'] == 'hello':
                 if not is_manualmode:
                     # 启动自动识别消息
                     msg = {"session_id": msg_info['session_id'], "type": "listen", "state": "start", "mode": "auto"}
