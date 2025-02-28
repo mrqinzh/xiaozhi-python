@@ -18,7 +18,7 @@ https://ccnphfhqs21z.feishu.cn/wiki/M0XiwldO9iJwHikpXD5cEx71nKh
 https://github.com/78/xiaozhi-esp32/blob/main/docs/websocket.md
 
 # 部署脚本
-python版本为3.8，以上版本应该也可以
+所使用python版本为3.8
 
 需要安装的依赖参考requirements.txt文件
 
